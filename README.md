@@ -1,1 +1,3 @@
-# ai
+# Collection of AI
+
+ai stuff
