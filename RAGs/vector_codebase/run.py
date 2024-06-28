@@ -5,7 +5,7 @@ from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
 from langchain_text_splitters import Language
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_chroma import Chroma
+from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -14,10 +14,14 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
+url = os.getenv('NEO4J_URI')
+username = os.getenv('NEO4J_USERNAME')
+password = os.getenv('NEO4J_PASSWORD')
+
 # Clone Python codebase repo
 current_directory = os.path.dirname(os.path.abspath(__file__))  # Current directory
 repo_path = os.path.join(current_directory, "codebase")  # Create a new directory name
-repo = Repo.clone_from("https://github.com/pallets/flask", to_path=repo_path) # Clone repo
+repo = Repo.clone_from("[repo-url]", to_path=repo_path) # Clone repo
 
 # Load codebase
 loader = GenericLoader.from_filesystem(
@@ -34,17 +38,32 @@ docs = loader.load()
 python_splitter = RecursiveCharacterTextSplitter.from_language(
     language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
 )
-texts = python_splitter.split_documents(docs)
+split_documents = python_splitter.split_documents(docs)
 # print(len(texts))
 
-# create db
-db = Chroma.from_documents(texts, OpenAIEmbeddings(disallowed_special=()))
-retriever = db.as_retriever(
-    search_type="mmr",  # Also test "similarity"
-    search_kwargs={"k": 8},
+db = Neo4jVector.from_documents(
+    split_documents, 
+    OpenAIEmbeddings(disallowed_special=()),
+    url=url, 
+    username=username, 
+    password=password, 
+    # search_type="hybrid"
 )
 
-# ToDo - experiment with gpt-3.5-turbo 
+# using existing db
+# db = Neo4jVector.from_existing_index(
+#     OpenAIEmbeddings(disallowed_special=()),
+#     url=url,
+#     username=username,
+#     password=password,
+#     index_name="vector",
+#     # keyword_index_name="keyword"
+#     # search_type="hybrid"
+# )
+
+# retriever for Q&A (default k=4)
+retriever = db.as_retriever(search_kwargs={'k': 6})
+
 llm = ChatOpenAI(model="gpt-4")
 
 # prompt for LLM to generate this search query
