@@ -13,37 +13,55 @@ url = os.getenv('NEO4J_URI')
 username = os.getenv('NEO4J_USERNAME')
 password = os.getenv('NEO4J_PASSWORD')
 
-# load docs/text
-wikipedia_query = "Urijah Faber"
-docs = WikipediaLoader(
-    query=wikipedia_query, 
-    # load_max_docs=2
-    ).load()
+def check_index() -> bool:
+    try:
+        Neo4jVector.from_existing_index(
+            OpenAIEmbeddings(), 
+            url=url, 
+            username=username, 
+            password=password, 
+            index_name="vector" # default index name
+        )
+        return True
+    except:
+        return False
+    
+index_exists = check_index()
 
-# split text
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-split_documents = text_splitter.split_documents(docs)
+if index_exists:
+    print("Using existing Neo4jVector DB")
+    db = Neo4jVector.from_existing_index(
+        OpenAIEmbeddings(), 
+        url=url, 
+        username=username, 
+        password=password, 
+        index_name="vector" # default index name
+        # # keyword index (only if created) is optional for Hybrid Search
+        # keyword_index_name="keyword" # default index name
+        # search_type="hybrid"
+    )
+else:
+    # load docs/text
+    wikipedia_query = "Urijah Faber"
+    docs = WikipediaLoader(
+        query=wikipedia_query, 
+        # load_max_docs=2
+        ).load()
 
-# connect to Neo4j, create embeddings, create vector db (with Hybrid Search option)
-db = Neo4jVector.from_documents(
-    split_documents, 
-    OpenAIEmbeddings(), 
-    url=url, 
-    username=username, 
-    password=password, 
-    # search_type="hybrid"
-)
+    # split text
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    split_documents = text_splitter.split_documents(docs)
 
-# using existing db
-# db = Neo4jVector.from_existing_index(
-#     OpenAIEmbeddings(),
-#     url=url,
-#     username=username,
-#     password=password,
-#     index_name="vector",
-#     # keyword_index_name="keyword"
-#     # search_type="hybrid"
-# )
+    # connect to Neo4j, create embeddings, create vector db (with Hybrid Search option)
+    print("Creating Neo4jVector DB")
+    db = Neo4jVector.from_documents(
+        split_documents, 
+        OpenAIEmbeddings(), 
+        url=url, 
+        username=username, 
+        password=password, 
+        # search_type="hybrid"
+    )
 
 user_query = "Who was Urijah Faber?"
 # docs_with_score = db.similarity_search_with_score(user_query, k=2)
