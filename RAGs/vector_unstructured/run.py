@@ -6,6 +6,7 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders import WikipediaLoader
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_openai import ChatOpenAI
+import time
 
 load_dotenv()
 
@@ -78,7 +79,12 @@ chain = RetrievalQAWithSourcesChain.from_chain_type(
     ChatOpenAI(temperature=0), chain_type="stuff", retriever=retriever
 )
 
+start_time = time.time()
 print(chain.invoke(
     {"question": user_query},
     # return_only_outputs=True,
 ))
+end_time = time.time()
+total_time = end_time - start_time
+formatted_total_time = f"{total_time:.2f}"
+print(f"Time: {formatted_total_time} seconds")
