@@ -8,9 +8,7 @@ from langchain_openai import ChatOpenAI
 import time
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.outputs import LLMResult
-from typing import List, Any, Sequence, Dict
-from langchain_core.documents import Document
-from langchain_core.messages import BaseMessage
+from typing import List, Any
 from langchain.callbacks.base import BaseCallbackHandler
 
 load_dotenv()
@@ -20,27 +18,28 @@ username = os.getenv('NEO4J_USERNAME')
 password = os.getenv('NEO4J_PASSWORD')
 diffbot_api_key = os.getenv('DIFFBOT_KEY')
 
-# # load docs/text
-# wikipedia_query = "Urijah Faber"
-# docs = WikipediaLoader(
-#     query=wikipedia_query, 
-#     # defaults to 25 (albeit API docs advise default is 100)
-#     load_max_docs=10
-#     ).load()
+# load docs/text
+wikipedia_query = "Urijah Faber"
+docs = WikipediaLoader(
+    query=wikipedia_query, 
+    # defaults to 25 (albeit API docs advise default is 100)
+    load_max_docs=10
+    ).load()
 
-# # convert to graph docs
-# diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=diffbot_api_key)
-# graph_docs = diffbot_nlp.convert_to_graph_documents(docs)
+# convert to graph docs
+diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=diffbot_api_key)
+graph_docs = diffbot_nlp.convert_to_graph_documents(docs)
 
 # connect to Neo4jGraph & populate graph db with graph docs
 graph = Neo4jGraph(url=url, username=username, password=password)
-# graph.add_graph_documents(
-#     graph_docs,
-#     baseEntityLabel=True,
-#     include_source=True
-#     )
-# # graph.refresh_schema()
+graph.add_graph_documents(
+    graph_docs,
+    baseEntityLabel=True,
+    include_source=True
+    )
+# graph.refresh_schema()
 
+# global vars
 total_tokens = 0
 total_time = 0
 
