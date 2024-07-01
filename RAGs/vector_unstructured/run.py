@@ -1,5 +1,4 @@
 import os
-from uuid import UUID
 from dotenv import load_dotenv
 from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
