@@ -1,4 +1,5 @@
 import os
+from uuid import UUID
 from dotenv import load_dotenv
 from langchain_community.vectorstores import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
@@ -7,6 +8,9 @@ from langchain_community.document_loaders import WikipediaLoader
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_openai import ChatOpenAI
 import time
+from langchain_community.callbacks import get_openai_callback
+from typing import List, Any, Sequence
+from langchain_core.documents import Document
 
 load_dotenv()
 
@@ -30,7 +34,7 @@ def check_index() -> bool:
 index_exists = check_index()
 
 if index_exists:
-    print("Using existing Neo4jVector DB")
+    print("Using existing Neo4jVector DB", end="\n\n")
     db = Neo4jVector.from_existing_index(
         OpenAIEmbeddings(), 
         url=url, 
@@ -54,7 +58,7 @@ else:
     split_documents = text_splitter.split_documents(docs)
 
     # connect to Neo4j, create embeddings, create vector db (with Hybrid Search option)
-    print("Creating Neo4jVector DB")
+    print("Creating Neo4jVector DB", end="\n\n")
     db = Neo4jVector.from_documents(
         split_documents, 
         OpenAIEmbeddings(), 
@@ -76,15 +80,41 @@ user_query = "Who was Urijah Faber?"
 retriever = db.as_retriever(search_kwargs={'k': 6})
 
 chain = RetrievalQAWithSourcesChain.from_chain_type(
-    ChatOpenAI(temperature=0), chain_type="stuff", retriever=retriever
+    ChatOpenAI(temperature=0), 
+    chain_type="stuff", 
+    retriever=retriever
 )
 
+# Print the prompts of the chain
+# def on_llm_start(serialized: Any, prompts: List[str], **kwargs: Any) -> None:
+#     print('Prompts:', prompts, end="\n\n")
+
+def on_retriever_end(documents: Sequence[Document], **kwargs: Any) -> Any:
+    print('Retrieved Similar Embeddings:')
+    for index, doc in enumerate(documents):
+        source = doc.metadata.get('source', 'No Source')
+        print(f"Document ID {index + 1}: {source}")
+    print()
+
 start_time = time.time()
-print(chain.invoke(
-    {"question": user_query},
-    # return_only_outputs=True,
-))
+with get_openai_callback() as cb: 
+    # cb.on_llm_start = on_llm_start
+    cb.on_retriever_end = on_retriever_end
+    response = chain.invoke({
+        "question": user_query,
+    },
+    # return_only_outputs=True
+)
 end_time = time.time()
 total_time = end_time - start_time
 formatted_total_time = f"{total_time:.2f}"
-print(f"Time: {formatted_total_time} seconds")
+
+print('[Langchain Prompts for OpenAI LLM]', end="\n\n")
+print('Question:', response.get('question'), end="\n\n")
+print('[Langchain RetrievalQAWithSourcesChain Class -> Question into Semantic Embedding]', end="\n\n")
+print('Final Source for Answer:', response.get('sources'), end="\n\n")
+print('Answer:', response.get('answer'), end="\n")
+total_tokens = cb.total_tokens
+if total_tokens != 0:
+    print(f"Total Tokens: {total_tokens}", end="\n\n")
+print(f"Time: {formatted_total_time} seconds", end="\n\n")
