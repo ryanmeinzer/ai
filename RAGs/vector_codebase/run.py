@@ -6,11 +6,16 @@ from langchain_community.document_loaders.parsers import LanguageParser
 from langchain_text_splitters import Language
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Neo4jVector
+from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_openai import OpenAIEmbeddings
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+import time
+from langchain_community.callbacks import get_openai_callback
+from typing import List, Any, Sequence
+from langchain_core.documents import Document
 
 load_dotenv()
 
@@ -41,6 +46,7 @@ python_splitter = RecursiveCharacterTextSplitter.from_language(
 split_documents = python_splitter.split_documents(docs)
 # print(len(texts))
 
+print("Creating Neo4jVector DB", end="\n\n")
 db = Neo4jVector.from_documents(
     split_documents, 
     OpenAIEmbeddings(disallowed_special=()),
@@ -50,7 +56,7 @@ db = Neo4jVector.from_documents(
     # search_type="hybrid"
 )
 
-# using existing db
+# print("Using existing Neo4jVector DB", end="\n\n")
 # db = Neo4jVector.from_existing_index(
 #     OpenAIEmbeddings(disallowed_special=()),
 #     url=url,
@@ -61,39 +67,53 @@ db = Neo4jVector.from_documents(
 #     # search_type="hybrid"
 # )
 
+user_query = "What is my name?"
+# docs_with_score = db.similarity_search_with_score(user_query, k=2)
+# for doc, score in docs_with_score:
+#     print("-" * 80)
+#     print("Score: ", score)
+#     print(doc.page_content)
+#     print("-" * 80)
+
 # retriever for Q&A (default k=4)
 retriever = db.as_retriever(search_kwargs={'k': 6})
 
-llm = ChatOpenAI(model="gpt-4")
-
-# prompt for LLM to generate this search query
-initial_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("placeholder", "{chat_history}"),
-        ("user", "{input}"),
-        (
-            "user",
-            "Given the above conversation, generate a search query to look up to get information relevant to the conversation",
-        ),
-    ]
+chain = RetrievalQAWithSourcesChain.from_chain_type(
+    ChatOpenAI(temperature=0), 
+    chain_type="stuff", 
+    retriever=retriever
 )
 
-retriever_chain = create_history_aware_retriever(llm, retriever, initial_prompt)
+# Print the prompts of the chain
+# def on_llm_start(serialized: Any, prompts: List[str], **kwargs: Any) -> None:
+#     print('Prompts:', prompts, end="\n\n")
 
-final_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            "Answer the user's questions based on the below context:\n\n{context}",
-        ),
-        ("placeholder", "{chat_history}"),
-        ("user", "{input}"),
-    ]
+def on_retriever_end(documents: Sequence[Document], **kwargs: Any) -> Any:
+    print('Retrieved Similar Embeddings:')
+    for index, doc in enumerate(documents):
+        source = doc.metadata.get('source', 'No Source')
+        print(f"Document ID {index + 1}: {source}")
+    print()
+
+start_time = time.time()
+with get_openai_callback() as cb: 
+    # cb.on_llm_start = on_llm_start
+    cb.on_retriever_end = on_retriever_end
+    response = chain.invoke({
+        "question": user_query,
+    },
+    # return_only_outputs=True
 )
-document_chain = create_stuff_documents_chain(llm, final_prompt)
+end_time = time.time()
+total_time = end_time - start_time
+formatted_total_time = f"{total_time:.2f}"
 
-qa = create_retrieval_chain(retriever_chain, document_chain)
-
-question = "What does the View Class do?"
-result = qa.invoke({"input": question})
-print(result["answer"])
+print('Question:', response.get('question'), end="\n\n")
+print('[Langchain Prompts for OpenAI LLM]', end="\n\n")
+print('[Langchain RetrievalQAWithSourcesChain Class -> Question into Semantic Embedding]', end="\n\n")
+print('Final Source for Answer:', response.get('sources'), end="\n\n")
+print('Answer:', response.get('answer'), end="\n")
+total_tokens = cb.total_tokens
+if total_tokens != 0:
+    print(f"Total Tokens: {total_tokens}", end="\n\n")
+print(f"Time: {formatted_total_time} seconds", end="\n\n")

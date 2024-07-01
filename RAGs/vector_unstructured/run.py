@@ -49,7 +49,8 @@ else:
     wikipedia_query = "Urijah Faber"
     docs = WikipediaLoader(
         query=wikipedia_query, 
-        # load_max_docs=2
+        # defaults to 25 (albeit API docs advise default is 100)
+        load_max_docs=10
         ).load()
 
     # split text
@@ -108,8 +109,8 @@ end_time = time.time()
 total_time = end_time - start_time
 formatted_total_time = f"{total_time:.2f}"
 
-print('[Langchain Prompts for OpenAI LLM]', end="\n\n")
 print('Question:', response.get('question'), end="\n\n")
+print('[Langchain Prompts for OpenAI LLM]', end="\n\n")
 print('[Langchain RetrievalQAWithSourcesChain Class -> Question into Semantic Embedding]', end="\n\n")
 print('Final Source for Answer:', response.get('sources'), end="\n\n")
 print('Answer:', response.get('answer'), end="\n")
