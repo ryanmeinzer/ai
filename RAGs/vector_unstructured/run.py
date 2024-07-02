@@ -40,9 +40,6 @@ if index_exists:
         username=username, 
         password=password, 
         index_name="vector" # default index name
-        # # keyword index (only if created) is optional for Hybrid Search
-        # keyword_index_name="keyword" # default index name
-        # search_type="hybrid"
     )
 else:
     # load docs/text
@@ -65,6 +62,9 @@ else:
         url=url, 
         username=username, 
         password=password, 
+        index_name="vector" # default index name
+        # # keyword index (only if created) is optional for Hybrid Search
+        # keyword_index_name="keyword" # default index name
         # search_type="hybrid"
     )
 
