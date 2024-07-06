@@ -18,6 +18,8 @@ username = os.getenv('NEO4J_USERNAME')
 password = os.getenv('NEO4J_PASSWORD')
 diffbot_api_key = os.getenv('DIFFBOT_KEY')
 
+# ToDo - implement conditional to load current index or create new
+
 # load docs/text
 wikipedia_query = "Urijah Faber"
 docs = WikipediaLoader(
