@@ -71,7 +71,7 @@ else:
     split_documents = python_splitter.split_documents(docs)
     # print(len(texts))
 
-    print("Creating Neo4jVector DB", end="\n\n")
+    print("Creating Neo4jVector DB with loaded & split docs", end="\n\n")
     db = Neo4jVector.from_documents(
         split_documents, 
         OpenAIEmbeddings(disallowed_special=()),
@@ -103,7 +103,7 @@ chain = RetrievalQAWithSourcesChain.from_chain_type(
 
 # Print the prompts of the chain
 # def on_llm_start(serialized: Any, prompts: List[str], **kwargs: Any) -> None:
-#     print('Prompts:', prompts, end="\n\n")
+#     print('Initial Prompt & Final Prompt:', prompts, end="\n\n")
 
 def on_retriever_end(documents: Sequence[Document], **kwargs: Any) -> Any:
     print('Retrieved Similar Embeddings:')
@@ -126,11 +126,12 @@ total_time = end_time - start_time
 formatted_total_time = f"{total_time:.2f}"
 
 print('Question:', response.get('question'), end="\n\n")
-print('[Langchain Prompts for OpenAI LLM]', end="\n\n")
-print('[Langchain RetrievalQAWithSourcesChain Class -> Question into Semantic Embedding]', end="\n\n")
-print('Final Source for Answer:', response.get('sources'), end="\n\n")
+print('[Initial Prompt]', end="\n\n")
+print('[Langchain RetrievalQAWithSourcesChain Class -> Question into Embedding', end="\n\n")
+print('Search Result:', response.get('sources'), end="\n\n")
+print('[Final Prompt]', end="\n\n")
 print('Answer:', response.get('answer'), end="\n")
 total_tokens = cb.total_tokens
 if total_tokens != 0:
-    print(f"Total Tokens: {total_tokens}", end="\n\n")
+    print(f"Tokens: {total_tokens}", end="\n\n")
 print(f"Time: {formatted_total_time} seconds", end="\n\n")
