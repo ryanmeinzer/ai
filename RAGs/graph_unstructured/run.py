@@ -47,18 +47,19 @@ class CypherHandler(BaseCallbackHandler):
 
     def on_llm_start(self, serialized: Any, prompts: List[str], **kwargs: Any) -> None:
         print('\nQuestion:', user_query, end="\n\n")
-        print('Initial Prompt for OpenAI LLM:', prompts, end="\n\n")
+        print('Initial Prompt:', prompts, end="\n\n")
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         # Below is handled in GraphCypherQAChain with verbose=True
-        # print('Cypher Search:', response.generations[0][0].text, end="\n\n")
+        # print('Cypher Graph Search:', response.generations[0][0].text, end="\n\n")
+        # print ('[Search Result]')
         global total_tokens
         total_tokens += response.llm_output['token_usage']['total_tokens']
 
 class QAHandler(BaseCallbackHandler):
     def on_llm_start(self, serialized: Any, prompts: List[str], **kwargs: Any) -> None:
         self.start_time = time.time()
-        print('\nFinal Prompt for OpenAI LLM:', prompts, end="\n\n")
+        print('\nFinal Prompt:', prompts, end="\n\n")
     
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         print('Answer:', response.generations[0][0].text, end="\n")
@@ -91,7 +92,7 @@ with get_openai_callback() as cb:
     # return_only_outputs=True
     )
 if total_tokens != 0:
-    print(f"\nTotal Tokens: {total_tokens}", end="\n\n")
+    print(f"\nTokens: {total_tokens}", end="\n\n")
 end_time = time.time()
 total_time += end_time - start_time
 formatted_total_time = f"{total_time:.2f}"
