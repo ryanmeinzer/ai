@@ -31,3 +31,13 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Troubleshooting
+
+If rebuilding KG, first make sure FalkorDB is empty with
+
+```
+docker exec -it [container_name] redis-cli FLUSHDB
+```
+
+then inspect repo_root for the local folder in route.ts
