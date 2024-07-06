@@ -23,49 +23,66 @@ url = os.getenv('NEO4J_URI')
 username = os.getenv('NEO4J_USERNAME')
 password = os.getenv('NEO4J_PASSWORD')
 
-# Clone Python codebase repo
-current_directory = os.path.dirname(os.path.abspath(__file__))  # Current directory
-repo_path = os.path.join(current_directory, "codebase")  # Create a new directory name
-repo = Repo.clone_from("[repo-url]", to_path=repo_path) # Clone repo
+def check_index() -> bool:
+    try:
+        Neo4jVector.from_existing_index(
+            OpenAIEmbeddings(disallowed_special=()),
+            url=url, 
+            username=username, 
+            password=password, 
+            index_name="vector" # default index name
+        )
+        return True
+    except:
+        return False
+    
+index_exists = check_index()
 
-# Load codebase
-loader = GenericLoader.from_filesystem(
-    'codebase',
-    glob="**/*",
-    suffixes=[".py"],
-    exclude=["**/non-utf8-encoding.py"],
-    parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
-)
-docs = loader.load()
-# print(len(docs))
+if index_exists:
+    print("Using existing Neo4jVector DB", end="\n\n")
+    db = Neo4jVector.from_existing_index(
+        OpenAIEmbeddings(disallowed_special=()),
+        url=url, 
+        username=username, 
+        password=password, 
+        index_name="vector" # default index name
+    )
+else:
+    print('Cloning Python codebase repo', end="\n\n")
+    current_directory = os.path.dirname(os.path.abspath(__file__))  # Current directory
+    repo_path = os.path.join(current_directory, "codebase")  # Create a new directory name
+    repo = Repo.clone_from("[repo-url]", to_path=repo_path) # Clone repo
 
-# split docs
-python_splitter = RecursiveCharacterTextSplitter.from_language(
-    language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
-)
-split_documents = python_splitter.split_documents(docs)
-# print(len(texts))
+    print('Loading codebase', end="\n\n")
+    loader = GenericLoader.from_filesystem(
+        'codebase',
+        glob="**/*",
+        suffixes=[".py"],
+        exclude=["**/non-utf8-encoding.py"],
+        parser=LanguageParser(language=Language.PYTHON, parser_threshold=500),
+    )
+    docs = loader.load()
+    # print(len(docs))
 
-print("Creating Neo4jVector DB with loaded & split docs", end="\n\n")
-db = Neo4jVector.from_documents(
-    split_documents, 
-    OpenAIEmbeddings(disallowed_special=()),
-    url=url, 
-    username=username, 
-    password=password, 
-    # search_type="hybrid"
-)
+    print('Splitting docs', end="\n\n")
+    python_splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language.PYTHON, chunk_size=2000, chunk_overlap=200
+    )
+    split_documents = python_splitter.split_documents(docs)
+    # print(len(texts))
 
-# print("Using existing Neo4jVector DB", end="\n\n")
-# db = Neo4jVector.from_existing_index(
-#     OpenAIEmbeddings(disallowed_special=()),
-#     url=url,
-#     username=username,
-#     password=password,
-#     index_name="vector",
-#     # keyword_index_name="keyword"
-#     # search_type="hybrid"
-# )
+    print("Creating Neo4jVector DB with loaded & split docs", end="\n\n")
+    db = Neo4jVector.from_documents(
+        split_documents, 
+        OpenAIEmbeddings(disallowed_special=()),
+        url=url, 
+        username=username, 
+        password=password, 
+        index_name="vector" # default index name
+        # # keyword index (only if created) is optional for Hybrid Search
+        # keyword_index_name="keyword" # default index name
+        # search_type="hybrid"
+    )
 
 user_query = "What is my name?"
 # docs_with_score = db.similarity_search_with_score(user_query, k=2)
