@@ -41,3 +41,8 @@ docker exec -it [container_name] redis-cli FLUSHDB
 ```
 
 then inspect repo_root for the local folder in route.ts
+
+## Examples
+
+For Cypher Graph Search, "Which functions are in the AppGroup Class?"
+For Cypher Vector Search, "Find a few functions which have conditional statements."

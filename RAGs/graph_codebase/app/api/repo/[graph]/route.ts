@@ -178,7 +178,6 @@ async function run_query
 
         // rewrite query
         params = {embeddings: embeddings};
-        // ToDo - investigate error with vector search, "Invalid arguments for procedure 'db.idx.vector.queryNodes'"
         let nodeDetails = 'YIELD node RETURN node.name AS name'
         let rewrite = `CALL db.idx.vector.queryNodes(${args.join(',')}) ${nodeDetails}`;
 
