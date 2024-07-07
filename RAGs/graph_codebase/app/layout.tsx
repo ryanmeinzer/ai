@@ -7,8 +7,8 @@ import GoogleAnalytics from './components/GoogleAnalytics'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Code Graph by FalkorDB',
-  description: 'Code Graph visualization application by FalkorDB',
+  title: 'Graph Codebase RAG QA',
+  // description: 'Code Graph visualization application by FalkorDB',
 }
 
 export default function RootLayout({

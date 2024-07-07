@@ -6,7 +6,7 @@ export async function GET(request: NextRequest, { params }: { params: { graph: s
     const nodeId  = parseInt(params.node);
     const graphId = params.graph;
 
-    const db = await FalkorDB.connect({url: process.env.FALKORDB_URL || 'falkor://localhost:6379',});
+    const db = await FalkorDB.connect({url: process.env.FALKORDB_URL || 'redis://localhost:6379',});
     const graph = db.selectGraph(graphId);
 
     // Get node's neighbors    

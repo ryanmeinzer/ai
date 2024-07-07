@@ -313,7 +313,7 @@ export async function POST(request: NextRequest) {
 
 	const db = await FalkorDB.connect(
 		{
-			url: process.env.FALKORDB_URL || "falkor://localhost:6379"
+			url: process.env.FALKORDB_URL || "redis://localhost:6379"
 		}
 	);
 

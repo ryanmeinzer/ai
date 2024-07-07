@@ -75,7 +75,7 @@ export default function Home() {
           <HomeIcon className="h-6 w-6" />
         </Link>
         <h1 className='font-extrabold'>
-          Code Graph by <Link href="https://www.falkordb.com">FalkorDB</Link>
+          Graph Codebase QA RAG
         </h1>
         <nav className="space-x-4">
           <Link className="text-gray-600 hover:text-gray-900" href="https://github.com/FalkorDB/code-graph" target='_blank'>

@@ -16,7 +16,7 @@ async function GraphSchemaToPrompt(
     let schema: any = await graphSchema(graphId, db);
 
     // Build a string description of graph schema
-    let desc: string = "The knowladge graph schema is as follows:\n";
+    let desc: string = "The knowledge graph schema is as follows:\n";
 
     //-------------------------------------------------------------------------
     // Describe labels
@@ -83,7 +83,7 @@ async function GraphSchemaToPrompt(
         }
     }
 
-    desc = desc + `This is the end of the knowladge graph schema description.\n`
+    desc = desc + `This is the end of the knowledge graph schema description.\n`
 
     //-------------------------------------------------------------------------
     // include graph indices
@@ -96,7 +96,7 @@ async function GraphSchemaToPrompt(
     // process indexes
     let indexes: any = res.data;
     if (indexes.length > 0) {
-        let index_prompt = "The knowladge graph contains the following indexes:\n"
+        let index_prompt = "The knowledge graph contains the following indexes:\n"
         for (let i = 0; i < indexes.length; i++) {
             const index = indexes[i];
             const label: string = index['label'];
@@ -134,6 +134,10 @@ async function GraphSchemaToPrompt(
     return desc;
 }
 
+interface NodeWithName {
+    name: string;
+}
+
 // handle instruction from OpenAI
 // there are two types of accepted instructions:
 // 1. Run query.
@@ -141,16 +145,22 @@ async function GraphSchemaToPrompt(
 async function run_query
 (
     graph: Graph,
-    query: string
+    query: string,
+    // add log for QA RAG Chain
+    log: string[], // array as param
+    totalTokens: number
 ) {
-    console.log(`query: ${query}`)
     let params = {};
+    // var to track Vector (vs Graph) search 
+    let vectorSearchUsed = false
 
     // handle cases where the query contains a vector index utilization
     // CALL db.idx.vector.queryNodes('Function', 'src_embeddings', 5, 'x= x   1')
     if(query.indexOf('CALL db.idx.vector.queryNodes(') !== -1) {
         // query utilizes a vector index
         // extract semantic value and produce embeddings
+
+        vectorSearchUsed   = true // if vectorSearchUsed, set to true
         let startIdx       = query.indexOf('CALL db.idx.vector.queryNodes(');
         let endIdx         = query.indexOf(')');
         let proc_call      = query.substring(startIdx + 'CALL db.idx.vector.queryNodes('.length, endIdx);
@@ -161,26 +171,54 @@ async function run_query
         let response   = await openai.embeddings.create({input:semantic_value, model:'text-embedding-ada-002'});
         let embeddings = response.data[0].embedding;
 
+        // Add the tokens used for creating embeddings, with optional chaining for safety
+        totalTokens += response.usage?.total_tokens || 0;
+
         args[args.length - 1] = "vecf32($embeddings)";
 
         // rewrite query
         params = {embeddings: embeddings};
-        let rewrite = 'CALL db.idx.vector.queryNodes(' + args.join(',') + query.substring(endIdx, query.length);
+        // ToDo - investigate error with vector search, "Invalid arguments for procedure 'db.idx.vector.queryNodes'"
+        let nodeDetails = 'YIELD node RETURN node.name AS name'
+        let rewrite = `CALL db.idx.vector.queryNodes(${args.join(',')}) ${nodeDetails}`;
+
         query = rewrite;
+
+        // Log semantic value & rewritten query
+        log.push(`\nQuestion into Embedding: \n${semantic_value}`)
+        log.push(`\nCypher Vector Search: \n${query}`)
     }
 
     let result = await graph.roQuery(query, {params: params});
+
+    // Log node names if vectorSearchUsed
+    if (vectorSearchUsed) {
+        const logMessage = result.data && result.data.length > 0
+            ? `\nRetrieved Similar Embeddings (Node Names): \n${result.data.map(node => (node as NodeWithName).name).join(', ')}`
+            : '\nRetrieved similar embeddings not found';
+        log.push(logMessage);
+    } else {
+        log.push(`\nCypher Graph Search: \n${query}`);
+    }
+
     return result.data;
 }
 
 // Chat bot handler
 export async function GET(request: NextRequest, { params }: { params: { graph: string } }) {
+    const startTime = new Date().getTime();
+    let totalTokens = 0;
+    const log: string[] = [];
+
     const graph_id = params.graph;
     let question = request.nextUrl.searchParams.get("q");
 
     if(!question) {
+        log.push('\nQuestion not specified');
         return NextResponse.json({ message: 'Question not specified' }, { status: 400 })
     }
+
+    log.push(`\nQuestion: \n${question}`);
 
     //-------------------------------------------------------------------------
     // Connect to graph
@@ -188,7 +226,7 @@ export async function GET(request: NextRequest, { params }: { params: { graph: s
 
     // hard coded graph id
     const db = await FalkorDB.connect({
-        url: process.env.FALKORDB_URL || 'falkor://localhost:6379',
+        url: process.env.FALKORDB_URL || 'redis://localhost:6379',
     });
     const graph = db.selectGraph(graph_id);
 
@@ -246,6 +284,8 @@ export async function GET(request: NextRequest, { params }: { params: { graph: s
 
     // Get completion for conversation
     let response = await openai.chat.completions.create(body);
+    totalTokens += response.usage?.total_tokens || 0;
+    log.push(`\nInitial Prompt: \n${prompt}`);
 
     //-------------------------------------------------------------------------
     // Perform instruction
@@ -268,10 +308,12 @@ export async function GET(request: NextRequest, { params }: { params: { graph: s
                 return NextResponse.json({ result: "Unknown function to run" }, { status: 500 });
             }
 
-            let result = await run_query(graph, functionArgs.query);
+            let result = await run_query(graph, functionArgs.query, log, totalTokens);
             query_result = JSON.stringify(result);
+            log.push(`\nSearch Result: \n${query_result}`);
         }
     } else {
+        log.push('\nUnexpected instruction');
         return NextResponse.json({ result: "Unexpected instruction" }, { status: 500 });
     }
 
@@ -279,18 +321,25 @@ export async function GET(request: NextRequest, { params }: { params: { graph: s
     // Digest response
     //-------------------------------------------------------------------------
 
-    console.log(`query_result: ${query_result}`);
     prompt = `This is the user's question: ${question}
-    And this is the data we've got from our knowladge graph: ${query_result}
-    Please formulate an answer to the user question based on the data we've got from the knowladge graph`;
+    And this is the data we've got from our knowledge graph: ${query_result}
+    Please formulate an answer to the user question based on the data we've got from the knowledge graph`;
 
     messages = [{ "role": "system", "content": prompt }];
+    log.push(`\nFinal Prompt: \n${prompt}`);
     response = await openai.chat.completions.create({
         "model": "gpt-3.5-turbo",
         "messages": messages,
     });
+    const endTime = new Date().getTime();
+    const responseTime = (endTime - startTime) / 1000;
+    const formattedResponseTime = responseTime.toFixed(2);
     const answer = response.choices[0]['message']['content'];
+    log.push(`\nAnswer: \n${answer}`);
+    totalTokens += response.usage?.total_tokens || 0;
+    log.push(`\nTokens: \n${totalTokens}`);
+    log.push(`Time: ${formattedResponseTime} seconds`);
+    console.log(log.join('\n\n'))
 
-    console.log(`response: ${answer}`);
     return NextResponse.json({ result: answer }, { status: 200 });
 }
