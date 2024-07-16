@@ -296,7 +296,7 @@ export async function GET(request: NextRequest, { params }: { params: { graph: s
     // Step 2: check if the model wanted to call a function
     const toolCalls: ChatCompletionMessageToolCall[] | undefined  = responseMessage.tool_calls;
 
-    let query_result: string = '';  // response from query
+    let query_result: string = '';  // response from query 
 
     if (toolCalls) {
         for (const toolCall of toolCalls) {
