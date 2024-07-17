@@ -38,6 +38,7 @@ In the root of this repo, create a .env file with the below keys alongside [your
 > NEO4J_URI=[your-value]  
 > NEO4J_USERNAME=[your-value]  
 > NEO4J_PASSWORD=[your-value]  
+> DIFFBOT_KEY=[your-value]  
 
 In `run.py`:
 > adjust the `wikipedia_query` and `user_query` variables according to your preference.
