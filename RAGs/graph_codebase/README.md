@@ -34,8 +34,8 @@ This repo loads a Python codebase from the web, parses, splits then indexes it i
 
 In the root of this repo, create a .env file with the below keys alongside [your-values]:
 
-> NEXT_PUBLIC_MODE=UNLIMITED
-> FALKORDB_URL=redis://localhost:6379
+> NEXT_PUBLIC_MODE=UNLIMITED  
+> FALKORDB_URL=redis://localhost:6379  
 > OPENAI_API_KEY=[your-value]  
 
 Run FalkorDB via Docker
