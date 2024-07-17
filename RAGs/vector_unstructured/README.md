@@ -4,7 +4,7 @@ This repo loads unstructured data from the web, indexes it into a vector databas
 
 ## Technologies
 
-[Neo4jVector](https://python.langchain.com/v0.2/docs/integrations/vectorstores/neo4jvector/) - DB  
+[Neo4jVector](https://python.langchain.com/v0.2/docs/integrations/vectorstores/neo4jvector/) - Vector DB  
 [OpenAI](https://openai.com/) - LLM for QA & RAG  
 [LangChain](https://www.langchain.com/) - Framework to build apps with LLMs  
 
