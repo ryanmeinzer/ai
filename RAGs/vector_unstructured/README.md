@@ -1,11 +1,11 @@
 ## Unstructured Data in Vector Database for Question-Answer Retrieval Augmented Generation
 
-This repo loads unstructured data from the web, indexes it into a vector database, then queries the database to generate an answer.
+This repo loads unstructured data from the web, splits then indexes it into a vector database, then queries the database using semantically similar embeddings to generate an answer.
 
 ## Technologies
 
 [Neo4jVector](https://python.langchain.com/v0.2/docs/integrations/vectorstores/neo4jvector/) - Vector DB  
-[OpenAI](https://openai.com/) - LLM for QA & RAG  
+[OpenAI](https://openai.com/) - LLM for QA, Vector Embeddings and RAG  
 [LangChain](https://www.langchain.com/) - Framework to build apps with LLMs  
 
 ## QA RAG Chain Logs (outputted by running repo)

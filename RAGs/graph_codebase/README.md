@@ -1,48 +1,76 @@
-[![Dockerhub](https://img.shields.io/docker/pulls/falkordb/falkordb?label=Docker)](https://hub.docker.com/r/falkordb/falkordb/)
-[![Discord](https://img.shields.io/discord/1146782921294884966?style=flat-square)](https://discord.gg/ErBEqN9E)
-[![Workflow](https://github.com/FalkorDB/code-graph/actions/workflows/nextjs.yml/badge.svg?branch=main)](https://github.com/FalkorDB/code-graph/actions/workflows/nextjs.yml)
+## Codebase in Graph Database with Vector Index for Question-Answer Retrieval Augmented Generation
 
-![image](https://github.com/FalkorDB/code-graph/assets/753206/60f535ed-cf29-44b2-9005-721f11614803)
+This repo loads a Python codebase from the web, parses, splits then indexes it into a graph database with an additional vector index of embeddings as node properties, then queries the graph database using a generated Cypher statement or with the vector index using semantically similar embeddings to generate an answer.
 
-## Getting Started
+## Technologies
 
-Run FalkorDB
+[Tree-sitter](https://tree-sitter.github.io/tree-sitter/) - Python parser  
+[Code-graph](https://github.com/FalkorDB/code-graph) - Constructs graph by Modules, Classes and Functions with respective vector embeddings as node properties  
+[FalkorDB](https://www.falkordb.com/) - Graph DB (Successor to RedisGraph EOL)  
+[OpenAI](https://openai.com/) - LLM for QA, Cypher and RAG  
+[LangChain](https://www.langchain.com/) - Framework to build apps with LLMs  
 
-```bash
+## QA RAG Chain Logs (outputted by running repo)
+
+[Question]  
+[Initial Prompt]  
+[Cypher Graph Search]  
+[Question into Embedding]  
+[Cypher Vector Search]  
+[Retrieved Similar Embeddings]  
+[Search Result]  
+[Final Prompt]  
+[Answer]  
+[Tokens]  
+[Time]  
+
+## Prerequisites
+
+- Sign up for [Docker](https://www.docker.com/)
+- Sign Up for [OpenAI](https://platform.openai.com/docs/quickstart/account-setup) 
+- Sign Up for [LangSmith](https://python.langchain.com/v0.1/docs/get_started/quickstart/#langsmith)
+
+## Run
+
+In the root of this repo, create a .env file with the below keys alongside [your-values]:
+
+> NEXT_PUBLIC_MODE=UNLIMITED
+> FALKORDB_URL=redis://localhost:6379
+> OPENAI_API_KEY=[your-value]  
+
+Run FalkorDB via Docker
+
+```
 docker run -p 6379:6379 -it --rm falkordb/falkordb
 ```
 
 Install node packages
 
-```bash
+```
 npm install
-```
-
-Set your OpenAI key
-
-```
-export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
 
 Run the development server:
 
-```bash
+```
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To interact with the app, open:
+
+> [http://localhost:3000](http://localhost:3000)
+
+Example questions you could ask that use different indexes include:
+
+* For Cypher Graph Search, "Which functions are in the AppGroup Class?"
+* For Cypher Vector Search, "Find a few functions which have conditional statements."
 
 ## Troubleshooting
 
-If rebuilding KG, first make sure FalkorDB is empty with
+If you are rebuilding the Graph DB, first make sure FalkorDB via Docker is empty with
 
 ```
 docker exec -it [container_name] redis-cli FLUSHDB
 ```
 
-then inspect repo_root for the local folder in route.ts
-
-## Examples
-
-For Cypher Graph Search, "Which functions are in the AppGroup Class?"
-For Cypher Vector Search, "Find a few functions which have conditional statements."
+then inspect `repo_root` for the local folder in `route.ts`

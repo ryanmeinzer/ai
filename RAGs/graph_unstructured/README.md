@@ -1,6 +1,6 @@
 ## Unstructured Data in Graph Database for Question-Answer Retrieval Augmented Generation
 
-This repo loads unstructured data from the web, indexes it into a graph database, then queries the database with a generated Cypher statement to generate an answer.
+This repo loads unstructured data from the web, converts then indexes it into a graph database, then queries the database using a generated Cypher statement to generate an answer.
 
 ## Technologies
 
