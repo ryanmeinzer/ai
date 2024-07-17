@@ -4,7 +4,7 @@ This repo loads unstructured data from the web, indexes it into a graph database
 
 ## Technologies
 
-[Diffbot NLP API](https://python.langchain.com/v0.2/docs/integrations/graphs/diffbot/#diffbot-nlp-api) - Graph Construction
+[Diffbot NLP API](https://python.langchain.com/v0.2/docs/integrations/graphs/diffbot/#diffbot-nlp-api) - Graph Construction  
 [Neo4jGraph](https://python.langchain.com/v0.2/docs/integrations/graphs/neo4j_cypher/) - Graph DB  
 [OpenAI](https://openai.com/) - LLM for QA, Cypher and RAG  
 [LangChain](https://www.langchain.com/) - Framework to build apps with LLMs  
