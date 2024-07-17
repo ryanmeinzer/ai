@@ -22,7 +22,7 @@ This repo loads unstructured data from the web, indexes it into a graph database
 
 ## Prerequisites
 
-- Sign up for [Diffbot](https://www.diffbot.com/)
+- Sign up for [Diffbot](https://www.diffbot.com/)  
 - Sign Up for [Neo4j Aura DB](https://neo4j.com/cloud/platform/aura-graph-database)
 - Sign Up for [OpenAI](https://platform.openai.com/docs/quickstart/account-setup) 
 - Sign Up for [LangSmith](https://python.langchain.com/v0.1/docs/get_started/quickstart/#langsmith)
