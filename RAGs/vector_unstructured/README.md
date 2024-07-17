@@ -1,4 +1,4 @@
-## Unstructured Data Question-Answer Retrieval Augmented Generation
+## Unstructured Data in Vector Database for Question-Answer Retrieval Augmented Generation
 
 This repo loads unstructured data from the web, indexes it into a vector database, then queries the database to generate an answer.
 
