@@ -4,7 +4,7 @@ This repo loads a Python codebase from the web, parses, splits then indexes it i
 
 ## Technologies
 
-[Tree-sitter](https://tree-sitter.github.io/tree-sitter/) - Python parser  
+[Tree-sitter](https://tree-sitter.github.io/tree-sitter/) - Parses code into a syntax tree using a language's grammar (e.g. Python Binding)  
 [Neo4jVector](https://python.langchain.com/v0.2/docs/integrations/vectorstores/neo4jvector/) - Vector DB  
 [OpenAI](https://openai.com/) - LLM for QA, Vector Embeddings and RAG   
 [LangChain](https://www.langchain.com/) - Framework to build apps with LLMs  

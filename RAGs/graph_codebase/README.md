@@ -4,7 +4,7 @@ This repo loads a Python codebase from the web, parses, splits then indexes it i
 
 ## Technologies
 
-[Tree-sitter](https://tree-sitter.github.io/tree-sitter/) - Python parser  
+[Tree-sitter](https://tree-sitter.github.io/tree-sitter/) - Parses code into a syntax tree using a language's grammar (e.g. Python Binding)  
 [Code-graph](https://github.com/FalkorDB/code-graph) - Constructs graph by Modules, Classes and Functions with respective vector embeddings as node properties  
 [FalkorDB](https://www.falkordb.com/) - Graph DB (Successor to RedisGraph EOL)  
 [OpenAI](https://openai.com/) - LLM for QA, Cypher and RAG  
