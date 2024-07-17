@@ -32,13 +32,13 @@ This repo loads unstructured data from the web, indexes it into a vector databas
 
 In the root of this repo, create a .env file with the below keys alongside [your-values]:
 
-> OPENAI_API_KEY=[your-value]
-> LANGCHAIN_TRACING_V2=true
-> LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
-> LANGCHAIN_API_KEY=[your-value]
-> NEO4J_URI=[your-value]
-> NEO4J_USERNAME=[your-value]
-> NEO4J_PASSWORD=[your-value]
+> OPENAI_API_KEY=[your-value]  
+> LANGCHAIN_TRACING_V2=true  
+> LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"  
+> LANGCHAIN_API_KEY=[your-value]  
+> NEO4J_URI=[your-value]  
+> NEO4J_USERNAME=[your-value]  
+> NEO4J_PASSWORD=[your-value]  
 
 In `run.py`:
 > adjust the `wikipedia_query` and `user_query` variables according to your preference.
