@@ -28,7 +28,6 @@ This repo loads a Python codebase from the web, parses, splits then indexes it i
 
 - Sign up for [Docker](https://www.docker.com/)
 - Sign Up for [OpenAI](https://platform.openai.com/docs/quickstart/account-setup) 
-- Sign Up for [LangSmith](https://python.langchain.com/v0.1/docs/get_started/quickstart/#langsmith)
 
 ## Run
 
