@@ -1,4 +1,4 @@
-# AI Tools including RAGs
+# AI Tools including RAGs with Graph & Vector DBs
 
 ## Retrieval Augmented Generations (RAGs)
 
