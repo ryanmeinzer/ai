@@ -84,7 +84,7 @@ else:
         # search_type="hybrid"
     )
 
-user_query = "What is my name?"
+user_query = "Which functions are in the AppGroup Class?"
 # docs_with_score = db.similarity_search_with_score(user_query, k=2)
 # for doc, score in docs_with_score:
 #     print("-" * 80)
