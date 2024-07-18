@@ -20,26 +20,47 @@ diffbot_api_key = os.getenv('DIFFBOT_KEY')
 
 # ToDo - implement conditional to load current index or create new
 
-# load docs/text
-wikipedia_query = "Urijah Faber"
-docs = WikipediaLoader(
-    query=wikipedia_query, 
-    # defaults to 25 (albeit API docs advise default is 100)
-    load_max_docs=10
-    ).load()
+def check_index() -> bool:
+    try:
+        Neo4jGraph(
+            url=url, 
+            username=username, 
+            password=password, 
+        )
+        return True
+    except:
+        return False
+    
+index_exists = check_index()
 
-# convert to graph docs
-diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=diffbot_api_key)
-graph_docs = diffbot_nlp.convert_to_graph_documents(docs)
-
-# connect to Neo4jGraph & populate graph db with graph docs
-graph = Neo4jGraph(url=url, username=username, password=password)
-graph.add_graph_documents(
-    graph_docs,
-    baseEntityLabel=True,
-    include_source=True
+if index_exists:
+    print("Using existing Neo4jGraph DB", end="\n\n")
+    graph = Neo4jGraph(
+        url=url, 
+        username=username, 
+        password=password, 
     )
-# graph.refresh_schema()
+else:
+    # load docs/text
+    wikipedia_query = "Urijah Faber"
+    docs = WikipediaLoader(
+        query=wikipedia_query, 
+        # defaults to 25 (albeit API docs advise default is 100)
+        load_max_docs=10
+        ).load()
+
+    # convert to graph docs
+    diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=diffbot_api_key)
+    graph_docs = diffbot_nlp.convert_to_graph_documents(docs)
+
+    # connect to Neo4jGraph & populate graph db with graph docs
+    graph = Neo4jGraph(url=url, username=username, password=password)
+    graph.add_graph_documents(
+        graph_docs,
+        baseEntityLabel=True,
+        include_source=True
+        )
+    # graph.refresh_schema()
 
 # global vars
 total_tokens = 0
