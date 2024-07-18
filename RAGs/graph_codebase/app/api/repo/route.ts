@@ -226,7 +226,7 @@ async function BuildGraph
 		graph: Graph,
 		repo_root: string
 	) {
-	console.log("BuildGraph");
+	console.log("Loading, parsing, splitting and converting codebase");
 
 	// Initialize Tree-Sitter
 	await InitializeTreeSitter();
@@ -263,7 +263,7 @@ async function BuildGraph
 	// create schema graph
 	await GraphOps.graphCreateSchema(graph, graphId, db);
 
-	console.log("Done BuildGraph");
+	console.log("Completed Building Graph DB");
 }
 
 async function InitializeTreeSitter() {
@@ -337,14 +337,14 @@ export async function POST(request: NextRequest) {
 		// check if repo was already cloned
 		try {
 			await fs.stat(repo_root)
-			console.log("Found folder");
+			console.log("Using existing cloned Python codebase repo");
 		} catch (error) {
 			//---------------------------------------------------------------------
 			// clone repo into temporary folder
 			//---------------------------------------------------------------------
 			try {
 				await git.clone({ fs, http, dir: repo_root, url, depth: 1 })
-				console.log("Cloned repo");
+				console.log("Cloning Python codebase repo");
 			} catch (error) {
 				console.error(error);
 				return NextResponse.json({ message: 'Repository not found' }, { status: 404 })

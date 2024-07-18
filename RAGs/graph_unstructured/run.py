@@ -39,7 +39,7 @@ if index_exists:
         password=password, 
     )
 else:
-    # load docs/text
+    print('Loading unstructured data', end="\n\n")
     wikipedia_query = "Urijah Faber"
     docs = WikipediaLoader(
         query=wikipedia_query, 
@@ -47,12 +47,13 @@ else:
         load_max_docs=10
         ).load()
 
-    # convert to graph docs
+    print('Converting docs', end="\n\n")
     diffbot_nlp = DiffbotGraphTransformer(diffbot_api_key=diffbot_api_key)
     graph_docs = diffbot_nlp.convert_to_graph_documents(docs)
 
     # connect to Neo4jGraph & populate graph db with graph docs
     graph = Neo4jGraph(url=url, username=username, password=password)
+    print("Creating Neo4jGraph DB index with loaded and converted docs", end="\n\n")
     graph.add_graph_documents(
         graph_docs,
         baseEntityLabel=True,

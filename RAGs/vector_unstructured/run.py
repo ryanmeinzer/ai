@@ -42,7 +42,7 @@ if index_exists:
         index_name="vector" # default index name
     )
 else:
-    # load docs/text
+    print('Loading unstructured data', end="\n\n")
     wikipedia_query = "Urijah Faber"
     docs = WikipediaLoader(
         query=wikipedia_query, 
@@ -50,12 +50,12 @@ else:
         load_max_docs=10
         ).load()
 
-    # split text
+    print('Splitting docs', end="\n\n")
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     split_documents = text_splitter.split_documents(docs)
 
     # connect to Neo4j, create embeddings, create vector db (with Hybrid Search option)
-    print("Creating Neo4jVector DB with loaded & split docs", end="\n\n")
+    print("Creating Neo4jVector DB index with loaded and split docs", end="\n\n")
     db = Neo4jVector.from_documents(
         split_documents, 
         OpenAIEmbeddings(), 

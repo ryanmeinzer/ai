@@ -53,7 +53,7 @@ else:
     repo_path = os.path.join(current_directory, "codebase")  # Create a new directory name
     repo = Repo.clone_from("[repo-url]", to_path=repo_path) # Clone repo
 
-    print('Loading codebase', end="\n\n")
+    print('Loading and parsing codebase', end="\n\n")
     loader = GenericLoader.from_filesystem(
         'codebase',
         glob="**/*",
@@ -71,7 +71,7 @@ else:
     split_documents = python_splitter.split_documents(docs)
     # print(len(texts))
 
-    print("Creating Neo4jVector DB with loaded & split docs", end="\n\n")
+    print("Creating Neo4jVector DB index with loaded, parsed and split docs", end="\n\n")
     db = Neo4jVector.from_documents(
         split_documents, 
         OpenAIEmbeddings(disallowed_special=()),

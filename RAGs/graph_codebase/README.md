@@ -1,6 +1,6 @@
 ## Codebase in Graph Database with Vector Index for Question-Answer Retrieval Augmented Generation
 
-This repo loads a Python codebase from the web, parses, splits then indexes it into a graph database with an additional vector index of embeddings as node properties, then queries the graph database using a generated Cypher statement or with the vector index using semantically similar embeddings to generate an answer.
+This repo loads a Python codebase from the web, parses, splits, converts then indexes it into a graph database with an additional vector index of embeddings as node properties, then queries the graph database using a generated Cypher statement or with the vector index using semantically similar embeddings to generate an answer.
 
 ## Technologies
 
