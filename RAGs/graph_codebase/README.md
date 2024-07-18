@@ -55,7 +55,7 @@ Run the development server:
 npm run dev
 ```
 
-To interact with the app, open:
+To interact with the QA web app, open:
 
 > [http://localhost:3000](http://localhost:3000)
 
