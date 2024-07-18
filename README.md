@@ -8,7 +8,7 @@ This repo loads a Python codebase from the web, parses, splits, converts then in
 [Graph Unstructured](/RAGs/graph_unstructured/)  
 This repo loads unstructured data from the web, converts then indexes it into a graph database, then queries the database using a generated Cypher statement to generate an answer. 
 
-[Vector Codebase](/RAGs/vector_codebase/)
+[Vector Codebase](/RAGs/vector_codebase/)  
 This repo loads a Python codebase from the web, parses, splits then indexes it into a vector database, then queries the database using semantically similar embeddings to generate an answer.  
 
 [Vector Unstructured](/RAGs/vector_unstructured/)  
